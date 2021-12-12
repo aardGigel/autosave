@@ -22,19 +22,53 @@
 <timers>
   <timer enabled="y" second="1.00" offset_second="0.00" send_to="12" script="do_autosave" />
 </timers>
-
-
+<aliases>
+  <alias
+    match="^autosave (on|off|show*)$"
+    script="autosave_toggle"
+    regexp="y"
+    ignore_case="y"
+    enabled="y"
+  >
+  </alias>
+  <alias
+    match="^autosave interval ([0-9]+)$"
+    script="autosave_interval"
+    regexp="y"
+    ignore_case="y"
+    enabled="y"
+  >
+  </alias>
+</aliases>
 <script>
 <![CDATA[
   local last_save = os.clock()
   local AUTOSAVE_INTERVAL = 60 * 10 -- 10 minutes apart
+  local autoSave = GetVariable("autoSave") or "on"
 
   function do_autosave()
     if GetInfo(111) or last_save + AUTOSAVE_INTERVAL < os.clock() then
-      Save()
-      ColourNote("white", "blue", "World file saved.")
-      last_save = os.clock()
+      if(autoSave == "on") then
+        Save()
+        ColourNote("white", "blue", "World file saved.")
+        last_save = os.clock()
+      end
     end
+  end
+
+	function autosave_toggle(name, line, wildcards)
+		if (not wildcards[1] or wildcards[1] == "" or wildcards[1] == "show") then
+			ColourNote("white", "blue","Autosave currently set to: '"..autoSave.. "'")
+		else
+			autoSave = wildcards[1]:lower()
+			SetVariable("autoSave", autoSave)
+			ColourNote("white", "blue","Autosave is now set to: '".. autoSave.. "'")
+		end
+	end
+  
+  function autosave_interval(name, line, wildcards)
+    AUTOSAVE_INTERVAL = 60 * tonumber(Trim(wildcards[1])) or 60 * 10
+    ColourNote("white", "blue","Autosave interval set to: ".. AUTOSAVE_INTERVAL.. " seconds.")
   end
 ]]>
 </script>
