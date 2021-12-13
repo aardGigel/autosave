@@ -24,8 +24,8 @@
 </timers>
 <aliases>
   <alias
-    match="^autosave (on|off|show*)$"
-    script="autosave_toggle"
+    match="^autosave (on|off|show|now*)$"
+    script="autosave_cmd"
     regexp="y"
     ignore_case="y"
     enabled="y"
@@ -45,10 +45,11 @@
   local last_save = os.clock()
   local AUTOSAVE_INTERVAL = 60 * 10 -- 10 minutes apart
   local autoSave = GetVariable("autoSave") or "on"
+  local blocking = false
 
   function do_autosave()
     if GetInfo(111) or last_save + AUTOSAVE_INTERVAL < os.clock() then
-      if(autoSave == "on") then
+      if(autoSave == "on" and blocking == false) then
         Save()
         ColourNote("white", "blue", "World file saved.")
         last_save = os.clock()
@@ -56,10 +57,14 @@
     end
   end
 
-	function autosave_toggle(name, line, wildcards)
+	function autosave_cmd(name, line, wildcards)
 		if (not wildcards[1] or wildcards[1] == "" or wildcards[1] == "show") then
 			ColourNote("white", "blue","Autosave currently set to: '"..autoSave.. "'")
-		else
+			ColourNote("white", "blue","Autosave interval set to: "..AUTOSAVE_INTERVAL.. " seconds")
+		elseif (wildcards[1] == "now") then
+      last_save = 0
+      do_autosave()
+    else
 			autoSave = wildcards[1]:lower()
 			SetVariable("autoSave", autoSave)
 			ColourNote("white", "blue","Autosave is now set to: '".. autoSave.. "'")
@@ -67,9 +72,24 @@
 	end
   
   function autosave_interval(name, line, wildcards)
-    AUTOSAVE_INTERVAL = 60 * tonumber(Trim(wildcards[1])) or 60 * 10
+    AUTOSAVE_INTERVAL = tonumber(Trim(wildcards[1])) or 60 * 10
     ColourNote("white", "blue","Autosave interval set to: ".. AUTOSAVE_INTERVAL.. " seconds.")
   end
+  
+  function OnPluginBroadcast(msg, id, name, text)
+    if (id == 'b6eae87ccedd84f510b74714') then
+      if (msg == 999) then
+        if (text == 'ok_you_can_go_now') then
+          blocking = false
+          --ColourNote("white", "green","You can save now!!!") 
+        else
+          blocking = true
+          --ColourNote("white", "red","Do not save !!!") 
+        end
+      end
+    end
+  end
+
 ]]>
 </script>
 
