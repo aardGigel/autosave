@@ -85,10 +85,10 @@
       if (tonumber(msg) == 999) then
         if (text == 'ok_you_can_go_now') then
           blocking = false
-          ColourNote("white", "green","You can save now!!!") 
-        else
+          --ColourNote("white", "green","You can save now!!!") 
+        elseif (text == 'kinda_busy') then
           blocking = true
-          ColourNote("white", "red","Do not save !!!") 
+          --ColourNote("white", "red","Do not save !!!") 
         end
       end
     end
@@ -96,4 +96,6 @@
 
 ]]>
 </script>
+
+
 </muclient>
