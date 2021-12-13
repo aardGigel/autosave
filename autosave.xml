@@ -60,7 +60,10 @@
 	function autosave_cmd(name, line, wildcards)
 		if (not wildcards[1] or wildcards[1] == "" or wildcards[1] == "show") then
 			ColourNote("white", "blue","Autosave currently set to: '"..autoSave.. "'")
-			ColourNote("white", "blue","Autosave interval set to: "..AUTOSAVE_INTERVAL.. " seconds")
+			if(autoSave == "on") then
+        ColourNote("white", "blue","Autosave interval set to: "..AUTOSAVE_INTERVAL.. " seconds")
+        ColourNote("white", "blue","Next autosave in: "..(AUTOSAVE_INTERVAL-(os.clock()-last_save)).. " seconds")
+      end
 		elseif (wildcards[1] == "now") then
       last_save = 0
       do_autosave()
