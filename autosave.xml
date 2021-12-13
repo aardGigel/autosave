@@ -63,6 +63,7 @@
 			if(autoSave == "on") then
         ColourNote("white", "blue","Autosave interval set to: "..AUTOSAVE_INTERVAL.. " seconds")
         ColourNote("white", "blue","Next autosave in: "..(AUTOSAVE_INTERVAL-(os.clock()-last_save)).. " seconds")
+        ColourNote("white", "blue","blocking is: "..tostring(blocking).. " ")
       end
 		elseif (wildcards[1] == "now") then
       last_save = 0
@@ -81,13 +82,13 @@
   
   function OnPluginBroadcast(msg, id, name, text)
     if (id == 'b6eae87ccedd84f510b74714') then
-      if (msg == 999) then
+      if (tonumber(msg) == 999) then
         if (text == 'ok_you_can_go_now') then
           blocking = false
-          --ColourNote("white", "green","You can save now!!!") 
+          ColourNote("white", "green","You can save now!!!") 
         else
           blocking = true
-          --ColourNote("white", "red","Do not save !!!") 
+          ColourNote("white", "red","Do not save !!!") 
         end
       end
     end
@@ -95,6 +96,4 @@
 
 ]]>
 </script>
-
-
 </muclient>
