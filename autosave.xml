@@ -20,7 +20,7 @@
 
 </plugin>
 <timers>
-  <timer enabled="y" second="1.00" offset_second="0.00" send_to="12" script="do_autosave" />
+  <timer enabled="y" second="1.00" offset_second="0.00" send_to="12" script="autosave_tick" />
 </timers>
 <aliases>
   <alias
@@ -43,40 +43,48 @@
 <script>
 <![CDATA[
   local last_save = os.clock()
-  local AUTOSAVE_INTERVAL = 60 * 10 -- 10 minutes apart
   local autoSave = GetVariable("autoSave") or "on"
+  local AUTOSAVE_INTERVAL = GetVariable("autoSave_interval") or 60 * 10
   local blocking = false
 
   function do_autosave()
-    if GetInfo(111) or last_save + AUTOSAVE_INTERVAL < os.clock() then
-      if(autoSave == "on" and blocking == false) then
-        Save()
-        ColourNote("white", "blue", "World file saved.")
-        last_save = os.clock()
-      end
+    if(blocking == false) then
+      Save()
+      ColourNote("white", "blue", "World file saved.")
+      last_save = os.clock()
+    else
+      ColourNote("white", "red", "Could not save, blocking state.")    
     end
   end
 
-	function autosave_cmd(name, line, wildcards)
-		if (not wildcards[1] or wildcards[1] == "" or wildcards[1] == "show") then
-			ColourNote("white", "blue","Autosave currently set to: '"..autoSave.. "'")
-			if(autoSave == "on") then
+  function autosave_tick()
+    if(autoSave == "on") then
+      if GetInfo(111) or last_save + AUTOSAVE_INTERVAL < os.clock() then
+        do_autosave()
+      end
+    end
+  end
+  
+  function autosave_cmd(name, line, wildcards)
+    if (not wildcards[1] or wildcards[1] == "" or wildcards[1] == "show") then
+      ColourNote("white", "blue","Autosave currently set to: '"..autoSave.. "'")
+      if(autoSave == "on") then
         ColourNote("white", "blue","Autosave interval set to: "..AUTOSAVE_INTERVAL.. " seconds")
         ColourNote("white", "blue","Next autosave in: "..(AUTOSAVE_INTERVAL-(os.clock()-last_save)).. " seconds")
         ColourNote("white", "blue","blocking is: "..tostring(blocking).. " ")
       end
-		elseif (wildcards[1] == "now") then
-      last_save = 0
-      do_autosave()
+    elseif (wildcards[1] == "now") then
+       do_autosave()
     else
-			autoSave = wildcards[1]:lower()
-			SetVariable("autoSave", autoSave)
-			ColourNote("white", "blue","Autosave is now set to: '".. autoSave.. "'")
-		end
-	end
+      autoSave = wildcards[1]:lower()
+      SetVariable("autoSave", autoSave)
+      ColourNote("white", "blue","Autosave is now set to: '".. autoSave.. "'")
+    end
+  end
   
   function autosave_interval(name, line, wildcards)
     AUTOSAVE_INTERVAL = tonumber(Trim(wildcards[1])) or 60 * 10
+    SetVariable("autoSave_Interval", AUTOSAVE_INTERVAL)
     ColourNote("white", "blue","Autosave interval set to: ".. AUTOSAVE_INTERVAL.. " seconds.")
   end
   
@@ -96,6 +104,4 @@
 
 ]]>
 </script>
-
-
 </muclient>
